@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MssqlRepository.Extensions;
+using Services.Extensions;
 
 namespace ToDo
 {
@@ -46,6 +47,7 @@ namespace ToDo
             services.AddSingleton<ILogManager, LogManager>();
 
             services.AddRepositories();
+            services.AddServices();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
