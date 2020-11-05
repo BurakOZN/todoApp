@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace MssqlRepository
 {
-    public abstract class Repository<T> where T : BaseEntity
+    public abstract class Repository<T> : IRepository<T> where T : BaseEntity
     {
         private readonly TodoContext _context;
         private readonly IParameter _parameterService;

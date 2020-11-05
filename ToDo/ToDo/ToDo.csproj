@@ -19,10 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Logger\Logger.csproj" />
     <ProjectReference Include="..\MssqlRepository\MssqlRepository.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\Services\Services.csproj" />
   </ItemGroup>
 
 
