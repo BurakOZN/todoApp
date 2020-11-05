@@ -2,6 +2,6 @@
 {
     public interface IParameter
     {
-        string Id { get; set; }
+        string UserId { get; set; }
     }
 }

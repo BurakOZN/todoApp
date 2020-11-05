@@ -49,7 +49,7 @@ namespace MssqlRepository
         public virtual async Task<BaseResponse> Add(T entity, bool isGenerateId = true)
         {
             entity.CreatedDate = DateTime.Now;
-            entity.CreatedBy = _parameterService.Id;
+            entity.CreatedBy = _parameterService.UserId;
             if (isGenerateId)
                 entity.Id = Guid.NewGuid().ToString();
             try
@@ -70,7 +70,7 @@ namespace MssqlRepository
                 {
                     item.Id = Guid.NewGuid().ToString();
                     item.CreatedDate = DateTime.Now;
-                    item.CreatedBy = _parameterService.Id;
+                    item.CreatedBy = _parameterService.UserId;
                 }
             try
             {
@@ -99,7 +99,7 @@ namespace MssqlRepository
         }
         public virtual async Task<BaseResponse> Update(T entity, bool forDelete = false)
         {
-            entity.UpdatedBy = _parameterService.Id;
+            entity.UpdatedBy = _parameterService.UserId;
             entity.LastUpdatedDate = DateTime.Now;
             var old = await Find(entity.Id);
             if (old.State != State.Success)

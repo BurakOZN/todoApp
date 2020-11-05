@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Text;
 
 namespace MssqlRepository.Helper
@@ -7,12 +10,12 @@ namespace MssqlRepository.Helper
     public class Parameter : IParameter
     {
         private readonly IHttpContextAccessor _context;
-        public ParameterService(IHttpContextAccessor context)
+        public Parameter(IHttpContextAccessor context)
         {
             _context = context;
-            Id = GetUserId();
+            UserId = GetUserId();
         }
-        public string Id { get; set; }
+        public string UserId { get; set; }
 
         private string GetUserId()
         {
