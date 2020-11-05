@@ -10,7 +10,7 @@ namespace DAL
 
         }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<Job> Products { get; set; }
+        public virtual DbSet<Job> Jobs { get; set; }
         protected override void OnModelCreating(ModelBuilder mb)
         {
             mb.Entity<User>(e =>
