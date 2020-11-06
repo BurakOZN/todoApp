@@ -1,0 +1,22 @@
+﻿@{
+    bool isAuth = false;
+    byte[] token;
+    if (Context.Session.TryGetValue("token", out token))
+        if (token.Length > 0)
+            isAuth = true;
+}
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@if (isAuth)
+{
+
+}
+else
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+        <p>Please login...</p>
+    </div>
+}
