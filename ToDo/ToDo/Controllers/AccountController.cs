@@ -24,5 +24,11 @@ namespace ToDo.Controllers
             var result = await _userService.Login(loginInfo);
             return Ok(result);
         }
+        [HttpPost]
+        public async Task<IActionResult> AddUser(AddUserRequest addUser)
+        {
+            var result = await _userService.AddUser(addUser);
+            return Ok(result);
+        }
     }
 }

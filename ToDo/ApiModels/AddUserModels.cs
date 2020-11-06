@@ -1,17 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace ApiModels
 {
-    public class LoginInfo
+    public class AddUserRequest
     {
         [Required]
         public string Username { get; set; }
         [Required]
         public string Password { get; set; }
-    }
-    public class LoginResponse
-    {
-        public string Token { get; set; }
     }
 }

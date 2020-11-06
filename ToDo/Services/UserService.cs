@@ -24,6 +24,14 @@ namespace Services
             _userRepository = userRepository;
             _configuration = configuration;
         }
+        public async Task<BaseResponse> AddUser(AddUserRequest model)
+        {
+            var user = new User();
+            user.Username = model.Username;
+            user.Password = HashManager.GetHash(model.Password);
+            var result = await _userRepository.Add(user);
+            return result;
+        }
         public async Task<BaseResponse> Login(LoginInfo loginInfo)
         {
             var userResult = await _userRepository.Get(x => x.Username == loginInfo.Username);
