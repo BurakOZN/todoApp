@@ -10,6 +10,7 @@ namespace Services.Extensions
         public static void AddServices(this IServiceCollection services)
         {
             services.AddScoped(typeof(IUserService), typeof(UserService));
+            services.AddScoped(typeof(IJobService), typeof(JobService));
         }
     }
 }

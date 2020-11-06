@@ -12,6 +12,7 @@ namespace MssqlRepository.Extensions
         {
             services.AddScoped(typeof(IParameter), typeof(Parameter));
             services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
+            services.AddScoped(typeof(IJobRepository), typeof(JobRepository));
         }
     }
 }
