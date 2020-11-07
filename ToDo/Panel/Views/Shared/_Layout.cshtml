@@ -154,6 +154,21 @@
             width: 100%;
         }
         }
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
     </style>
 </head>
 <body>
@@ -219,7 +234,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2020 - Panel - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <p style="color:red">@ViewBag.Error</p>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

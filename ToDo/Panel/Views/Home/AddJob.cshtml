@@ -1,4 +1,14 @@
-﻿<form class="modal-content animate" method="post">
+﻿@using ApiModels
+@model Panel.Models.BaseResponse<object>
+@{
+    if (null != Model.Message)
+    {
+        <script type="text/javascript">
+            alert("@Model.Message");
+        </script>
+    }
+}
+<form class="modal-content animate" method="post">
     <h1>Add Job</h1>
     <div class="container">
         <label for="Name"><b>Username</b></label>
@@ -8,9 +18,9 @@
         <input type="text" placeholder="Enter Description" name="Description" required>
 
         <label for="psw"><b>StartDate</b></label>
-        <input type="date" placeholder="Enter StartDate" name="StartTime" required>
+        <input type="date" placeholder="Enter StartDate" name="StartDate" required>
 
-        <label for="psw"><b>Type</b></label>
+        <label for="Type"><b>Type</b></label>
         <select name="Type">
             <option value="0">Daily</option>
             <option value="1">Weekly</option>

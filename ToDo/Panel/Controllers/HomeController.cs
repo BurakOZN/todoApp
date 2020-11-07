@@ -8,54 +8,146 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Panel.Helper;
 using Panel.Models;
 
 namespace Panel.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly IApiConnection _apiConnection;
+        private string baseUrl = "https://localhost:5001/api/";
+        public HomeController(IApiConnection apiConnection)
         {
-            _logger = logger;
+            _apiConnection = apiConnection;
+        }
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+
+            if (IsAuth())
+            {
+                _apiConnection.AddHeader(new Dictionary<string, string>() { { "Authorization", "bearer " + GetToken() } });
+                var response = await _apiConnection.Get<BaseResponse<List<GetJobResponse>>>(baseUrl + "Job/GetAll");
+                if (response.IsSuccess)
+                    if (response.Result.State == State.Success)
+                        return View(new BaseResponse<List<GetJobResponse>>() { Result = response.Result.Result });
+                    else
+                        return View(new BaseResponse<List<GetJobResponse>>() { Message = response.Result.Message });
+                else
+                    return View(new BaseResponse<List<GetJobResponse>>() { Message = response.ErrorMessage });
+            }
+            else
+                return View(new BaseResponse<List<GetJobResponse>>());
+        }
+        [HttpPost]
+        public async Task<IActionResult> Index(FilterModel filterModel)
+        {
+            if (IsAuth())
+            {
+                _apiConnection.AddHeader(new Dictionary<string, string>() { { "Authorization", "bearer " + GetToken() } });
+                var response = await _apiConnection.Post<BaseResponse<List<GetJobResponse>>>(baseUrl + "Job/GetWithFilter", filterModel);
+                if (response.IsSuccess)
+                    if (response.Result.State == State.Success)
+                        return View(new BaseResponse<List<GetJobResponse>>() { Result = response.Result.Result });
+                    else
+                        return View(new BaseResponse<List<GetJobResponse>>() { Message = response.Result.Message });
+                else
+                    return View(new BaseResponse<List<GetJobResponse>>() { Message = response.ErrorMessage });
+
+            }
+            else
+                return View(new BaseResponse<List<GetJobResponse>>() { Message = "Please login" });
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> AddJob()
         {
-            
-            return View();
+            return View(new BaseResponse<object>());
         }
-
-        public IActionResult AddJob(AddJobRequest addJobRequest)
+        [HttpPost]
+        public async Task<IActionResult> AddJob(AddJobRequest addJobRequest)
         {
-            return View();
+            if (IsAuth())
+            {
+                _apiConnection.AddHeader(new Dictionary<string, string>() { { "Authorization", "bearer " + GetToken() } });
+                var response = await _apiConnection.Post<BaseResponse<object>>(baseUrl + "Job/Add", addJobRequest);
+                if (response.IsSuccess)
+                    if (response.Result.State == State.Success)
+                        return RedirectToAction("Index");
+                    else
+                        return View(new BaseResponse<List<GetJobResponse>>() { Message = response.Result.Message });
+                else
+                    return View(new BaseResponse<List<GetJobResponse>>() { Message = response.ErrorMessage });
+            }
+            else
+                return View(new BaseResponse<List<GetJobResponse>>() { Message = "Please login" });
         }
-        public IActionResult Login(LoginInfo loginInfo)
+        public async Task<IActionResult> Login(LoginInfo loginInfo)
         {
-            HttpContext.Session.SetString("token", "123");
+            var response = await _apiConnection.Post<BaseResponse<LoginResponse>>(baseUrl + "Account/Login", loginInfo);
+            if (response.IsSuccess)
+                if (response.Result.State == State.Success)
+                {
+                    var loginResponse = response.Result.Result;
+                    HttpContext.Session.SetString("token", loginResponse.Token);
+                }
+                else
+                {
+                    var baseModel = new BaseViewModel<object>();
+                    baseModel.ErrorMessage = response.Result.Header + ":-" + response.Result.Message;
+                    return RedirectToAction("Index", baseModel);
+                }
             return RedirectToAction("Index");
         }
-        public IActionResult Logout(LoginInfo loginInfo)
+        public async Task<IActionResult> Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Index");
         }
-        public IActionResult Signup(AddUserRequest loginInfo)
+        public async Task<IActionResult> Signup(AddUserRequest addInfo)
         {
-            return View();
+            var response = await _apiConnection.Post<BaseResponse<LoginResponse>>(baseUrl + "Account/AddUser", addInfo);
+            if (response.IsSuccess)
+                if (response.Result.State == State.Success)
+                {
+                    var loginResponse = response.Result.Result;
+                    HttpContext.Session.SetString("token", loginResponse.Token);
+                }
+                else
+                {
+                    ViewBag.Error = response.Result.Header + ":-" + response.Result.Message;
+                }
+            return RedirectToAction("Index");
+
         }
-
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public async Task<IActionResult> Done(JobDoneRequest doneRequest)
         {
-            return View();
+            if (IsAuth())
+            {
+                _apiConnection.AddHeader(new Dictionary<string, string>() { { "Authorization", "bearer " + GetToken() } });
+                var response = await _apiConnection.Post<BaseResponse<object>>(baseUrl + "Job/Done", doneRequest);
+                if (response.IsSuccess)
+                    if (response.Result.State == State.Success)
+                        return RedirectToAction("Index");
+                    else
+                        return RedirectToAction("Index", new BaseResponse<List<GetJobResponse>>() { Message = response.Result.Message });
+                else
+                    return RedirectToAction("Index", new BaseResponse<List<GetJobResponse>>() { Message = response.ErrorMessage });
+            }
+            else
+                return RedirectToAction("Index", new BaseResponse<List<GetJobResponse>>() { Message = "Please login" });
         }
-        private bool isAuth()
+        private bool IsAuth()
         {
             var token = HttpContext.Session.GetString("token");
             return !string.IsNullOrEmpty(token);
+        }
+        private string GetToken()
+        {
+            var token = HttpContext.Session.GetString("token");
+            return token;
         }
     }
 }

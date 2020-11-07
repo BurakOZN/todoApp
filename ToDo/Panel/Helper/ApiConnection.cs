@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Panel.Helper
@@ -51,7 +53,7 @@ namespace Panel.Helper
             var request = new HttpRequestMessage(HttpMethod.Post, url);
             if (content != null)
             {
-                var contentString = JsonConvert.SerializeObject(content);
+                var contentString = System.Text.Json.JsonSerializer.Serialize(content);
                 request.Content = new StringContent(contentString, Encoding.UTF8, "application/json");
             }
             SetHeader(request);
@@ -61,7 +63,7 @@ namespace Panel.Helper
         {
             var request = new HttpRequestMessage(HttpMethod.Put, url);
             if (content != null)
-                request.Content = new StringContent(JsonConvert.SerializeObject(content));
+                request.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(content));
             SetHeader(request);
             return await SendAsync<T>(request);
         }

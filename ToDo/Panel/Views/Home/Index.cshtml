@@ -1,17 +1,82 @@
-﻿@{
+﻿@using ApiModels
+@model Panel.Models.BaseResponse<List<GetJobResponse>>
+@{
     bool isAuth = false;
+    var tableObject = Model.Result ?? null;
     byte[] token;
     if (Context.Session.TryGetValue("token", out token))
         if (token.Length > 0)
             isAuth = true;
+    if (null != Model.Message)
+    {
+        <script type="text/javascript">
+            alert("@Model.Message");
+        </script>
+    }
 }
 @{
     ViewData["Title"] = "Home Page";
 }
 
+<form method="post">
+
+    <div class="container">
+
+        <label for="State"><b>State</b></label>
+        <select name="State">
+            <option value="0">All</option>
+            <option value="1">IsActive</option>
+            <option value="2">Done</option>
+        </select>
+        <label for="psw"><b>Type</b></label>
+        <select name="Type">
+            <option value="-1">Select</option>
+            <option value="0">Daily</option>
+            <option value="1">Weekly</option>
+            <option value="2">Monthly</option>
+        </select>
+
+        <button type="submit" formaction="/Home/Index">Filter</button>
+
+    </div>
+</form>
 @if (isAuth)
 {
+    <table>
+        <tr>
+            <th>Job</th>
+            <th>Description</th>
+            <th>Start Date</th>
+            <th>Is Done</th>
+            <th>Type</th>
+            <th>Action</th>
+        </tr>
+        @{
+            if (tableObject != null)
+                foreach (var item in tableObject)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Description</td>
+                        <td>@item.StartDate</td>
+                        <td>@item.IsDone</td>
+                        <td>@item.Type</td>
+                        <td>
+                            @if (!item.IsDone)
+                            {
+                                <form method="post">
+                                    <input value="@item.Id" hidden name="JobId" />
+                                    <button type="submit" formaction="/Home/Done">Done</button>
 
+                                </form>
+                            }
+                        </td>
+
+                    </tr>
+                }
+        }
+
+    </table>
 }
 else
 {
