@@ -34,6 +34,7 @@ namespace Services
             job.Description = model.Description;
             job.StartDate = model.StartDate;
             job.JobType = (JobType)model.Type;
+            job.UserId = _parameter.UserId;
             var result = await _jobRepository.Add(job);
             if (result.State != State.Success)
                 _logManager.Error(result.ToString());
@@ -52,8 +53,36 @@ namespace Services
                         Id = x.Id,
                         Name = x.Name,
                         Description = x.Description,
-                        Type = (int)x.JobType,
-                        StartDate = x.StartDate,
+                        Type = Enum.GetName(typeof(JobType), x.JobType),
+                        StartDate = x.StartDate.ToShortDateString(),
+                        IsDone = x.IsDone
+                    }
+                    );
+                return new SuccessResponse(results);
+            }
+            return dbModels;
+        }
+        public async Task<BaseResponse> GetIsDone(int type = -1)
+        {
+            BaseResponse dbModels = null;
+            if (type == -1)
+                dbModels = await _jobRepository.Get(x => x.UserId == _parameter.UserId && x.IsDone);
+            else
+                dbModels = await _jobRepository.Get(x => x.UserId == _parameter.UserId && x.IsDone && x.JobType == (JobType)type);
+
+            if (dbModels.State != State.Success)
+                _logManager.Error(dbModels.ToString());
+            else
+            {
+                var results = ((List<Job>)dbModels.Result).Select(
+                    x => new GetJobResponse()
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Description = x.Description,
+                        Type = Enum.GetName(typeof(JobType), x.JobType),
+                        StartDate = x.StartDate.ToShortDateString(),
+                        IsDone = x.IsDone
                     }
                     );
                 return new SuccessResponse(results);
@@ -73,23 +102,32 @@ namespace Services
                         Id = x.Id,
                         Name = x.Name,
                         Description = x.Description,
-                        Type = (int)x.JobType,
-                        StartDate = x.StartDate,
+                        Type = Enum.GetName(typeof(JobType), x.JobType),
+                        StartDate = x.StartDate.ToShortDateString(),
                     }
                     );
                 return new SuccessResponse(results);
             }
             return dbModels;
         }
-        public async Task<BaseResponse> GetActive()
+        public async Task<BaseResponse> GetActive(int type = -1)
         {
             var now = DateTime.Now;
-            var dbModels = await _jobRepository.Get(x => x.UserId == _parameter.UserId && !x.IsDone &&
-            (
-            (x.JobType == JobType.Daily && x.StartDate.Year == now.Year && x.StartDate.Month == now.Month && x.StartDate.Day == now.Day) ||
-            (x.JobType == JobType.Weekly && x.StartDate.Year == now.Year && x.StartDate.DayOfYear <= now.DayOfYear && x.StartDate.DayOfYear + 7 > now.DayOfYear) ||
-            (x.JobType == JobType.Weekly && x.StartDate.Year == now.Year && x.StartDate.Day <= now.Day && x.StartDate.Day + 30 > now.DayOfYear)
-            ));
+            BaseResponse dbModels = null;
+            if (type == -1)
+                dbModels = await _jobRepository.Get(x => x.UserId == _parameter.UserId && !x.IsDone &&
+                (
+                (x.JobType == JobType.Daily && x.StartDate.Year == now.Year && x.StartDate.Month == now.Month && x.StartDate.Day == now.Day) ||
+                (x.JobType == JobType.Weekly && x.StartDate.Year == now.Year && x.StartDate.DayOfYear <= now.DayOfYear && x.StartDate.DayOfYear + 7 > now.DayOfYear) ||
+                (x.JobType == JobType.Monthly && x.StartDate.Year == now.Year && x.StartDate.Day <= now.Day && x.StartDate.Day + 30 > now.DayOfYear)
+                ));
+            else
+                dbModels = await _jobRepository.Get(x => x.UserId == _parameter.UserId && !x.IsDone && x.JobType == (JobType)type &&
+                    (
+                    (x.JobType == JobType.Daily && x.StartDate.Year == now.Year && x.StartDate.Month == now.Month && x.StartDate.Day == now.Day) ||
+                    (x.JobType == JobType.Weekly && x.StartDate.Year == now.Year && x.StartDate.DayOfYear <= now.DayOfYear && x.StartDate.DayOfYear + 7 > now.DayOfYear) ||
+                    (x.JobType == JobType.Monthly && x.StartDate.Year == now.Year && x.StartDate.Day <= now.Day && x.StartDate.Day + 30 > now.DayOfYear)
+                    ));
             if (dbModels.State != State.Success)
                 _logManager.Error(dbModels.ToString());
             else
@@ -100,13 +138,26 @@ namespace Services
                         Id = x.Id,
                         Name = x.Name,
                         Description = x.Description,
-                        Type = (int)x.JobType,
-                        StartDate = x.StartDate,
+                        Type = Enum.GetName(typeof(JobType), x.JobType),
+                        StartDate = x.StartDate.ToShortDateString(),
                     }
                     );
                 return new SuccessResponse(results);
             }
             return dbModels;
+        }
+        public async Task<BaseResponse> GetWithFilter(JobFilterRequest filter)
+        {
+            if (filter.State == 0)
+                if (filter.Type == -1)
+                    return await GetAll();
+                else
+                    return await GetWithType(filter.Type);
+            else if (filter.State == 1)
+                return await GetActive(filter.Type);
+            else
+                return await GetIsDone(filter.Type);
+
         }
         public async Task<BaseResponse> Done(JobDoneRequest model)
         {

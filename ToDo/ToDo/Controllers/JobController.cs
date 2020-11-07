@@ -31,10 +31,10 @@ namespace ToDo.Controllers
             var result = await _jobService.GetAll();
             return Ok(result);
         }
-        [HttpGet, Authorize]
-        public async Task<IActionResult> GetWithType(int type)
+        [HttpPost, Authorize]
+        public async Task<IActionResult> GetWithFilter(JobFilterRequest filter)
         {
-            var result = await _jobService.GetWithType(type);
+            var result = await _jobService.GetWithFilter(filter);
             return Ok(result);
         }
         [HttpGet, Authorize]
@@ -43,7 +43,7 @@ namespace ToDo.Controllers
             var result = await _jobService.GetActive();
             return Ok(result);
         }
-        [HttpPut, Authorize]
+        [HttpPost, Authorize]
         public async Task<IActionResult> Done(JobDoneRequest jobDone)
         {
             var result = await _jobService.Done(jobDone);

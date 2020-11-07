@@ -30,6 +30,12 @@ namespace Services
             user.Username = model.Username;
             user.Password = HashManager.GetHash(model.Password);
             var result = await _userRepository.Add(user);
+            if (result.State == State.Success)
+            {
+                var loginResponse = new LoginResponse();
+                loginResponse.Token = BuildToken(user.Id);
+                return new SuccessResponse(loginResponse);
+            }
             return result;
         }
         public async Task<BaseResponse> Login(LoginInfo loginInfo)

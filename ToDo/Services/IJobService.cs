@@ -8,8 +8,10 @@ namespace Services
     {
         Task<BaseResponse> Add(AddJobRequest model);
         Task<BaseResponse> Done(JobDoneRequest model);
-        Task<BaseResponse> GetActive();
+        Task<BaseResponse> GetActive(int type = -1);
         Task<BaseResponse> GetAll();
+        Task<BaseResponse> GetIsDone(int type = -1);
+        Task<BaseResponse> GetWithFilter(JobFilterRequest filter);
         Task<BaseResponse> GetWithType(int type);
     }
 }
